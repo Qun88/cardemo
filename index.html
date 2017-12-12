@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Demo</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.1&key=9ac8232ce4297162abb75215a431ce62"></script>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        main {
+            padding-left: 300px;
+            height: calc(100% - 64px);
+        }
+
+        #showCard {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navbar-fixed">
+            <nav>
+                <div class="nav-wrapper">
+                    <ul class="right hide-on-med-and-down">
+                        <li>
+                            <a href="#">登出</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <ul id="nav-mobile" class="side-nav fixed" style="transform: translateX(0px);top: 66px;">
+            <li class="no-padding">
+                <ul class="collapsible collapsible-accordion" id="menu">
+                    <script type="text/template" charset="utf-8" id='template_1'>
+                        {{for(var i=0; i<it.length; i++){ }}
+                            <li class="bold">
+                                <a class="collapsible-header waves-effect waves-teal" href="###">{{=it[i][0]}}</a>
+                                <div class="collapsible-body">
+                                    <ul>
+                                        {{ for(var j=0; j<it[i][1].length; j++){ }}
+                                            <li><a style="cursor: pointer;" onclick="showImg(this)" path="{{=it[i][1][j].path}}" lat="{{=it[i][1][j].info.lat}}" lon="{{=it[i][1][j].info.lon}}">{{=it[i][1][j].name}}</a></li>
+                                        {{ } }}
+                                    </ul>
+                                </div>
+                            </li>
+                        {{ } }}
+                    </script>
+                </ul>
+            </li>
+        </ul>
+    </header>
+    <main>
+        <div class="container" style="max-width: 100%;width:100%; height: 100%;margin:0px">
+            <div class="row" style="margin: 0px;height:100%;">
+                <div class="col s12" style="padding: 0px;">
+                    <div class="row" style="margin: 0px;height: 340.5px;">
+                        <div id="showCard" class="card small" style="height: 320px;position: absolute;left:50%;margin-left:-75px;">
+                            <img id="showImg" class="materialboxed" src="" height="260px" alt="">
+                            <div class="card-content" style="padding: 10px 20px;">
+                                <span id="showName"></span>
+                                <br>
+                                <span id="showInfo"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12" style="padding: 0px;height:calc(100% - 340.5px)">
+                    <div id="map" style="width:100%;height:100%;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <script src="./js/dot.min.js"></script>
+    <script type="text/javascript">
+
+        var map;
+        var marker;
+        $(".button-collapse").sideNav({
+            menuWidth: 300, // Default is 300
+        });
+        $(function () {
+            map = new AMap.Map('map', {
+                resizeEnable: true,
+                zoomEnable: true,
+                zoom: 4,
+                center: [104.2114, 28.4230],
+                mapStyle:'amap://styles/6b7438287084617adbee24b920186dd6'
+            });
+        })
+        $(function () {
+            $.ajax({
+                url: 'http://47.93.12.23:3001/getlist',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var dataObj = data.data;
+                    var dataArr = Object.entries(dataObj);
+                    var template = $('#template_1').html();
+                    $('#menu').html(doT.template(template)(dataArr));
+                }
+            })
+
+        })
+        function showImg(m) {
+            $('#showCard').css('display', 'block')
+            $('#showImg').attr('src', $(m).attr('path'));
+            $('#showName').html($(m).text());
+            $('#showInfo').html("位置" + $(m).attr('lat') + "--" + $(m).attr('lon'))
+            map.setZoomAndCenter(15, new AMap.LngLat($(m).attr('lon'), $(m).attr('lat')));
+            addMarker($(m).attr('lat'), $(m).attr('lon'));
+        }
+
+        function showRecords(o) {
+
+        }
+
+        function addMarker(lat, lon) {
+
+            if (marker) {
+                map.remove(marker);
+            }
+
+            marker = new AMap.Marker({
+                icon: "car.png",
+                angle: 0,
+                position: [lon, lat]
+            });
+            marker.setMap(map);
+        }
+    </script>
+</body>
+
+</html>
