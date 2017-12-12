@@ -47,13 +47,12 @@
                 <ul class="collapsible collapsible-accordion" id="menu">
                     <script type="text/template" charset="utf-8" id='template_1'>
                         {{for(var i=0; i<it.length; i++){ }}
-                            <li class="bold" onclick="showAllMarker(this)">
+                            <li class="bold">
                                 <a class="collapsible-header waves-effect waves-teal" href="###">{{=it[i][0]}}</a>
                                 <div class="collapsible-body">
                                     <ul>
                                         {{ for(var j=0; j<it[i][1].length; j++){ }}
                                             <li><a style="cursor: pointer;" 
-                                                onclick="showImg(this)" 
                                                 path="{{=it[i][1][j].path}}" 
                                                 lat="{{=it[i][1][j].info.lat}}" 
                                                 lon="{{=it[i][1][j].info.lon}}" 
@@ -96,14 +95,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
     <script src="./js/dot.min.js"></script>
     <script type="text/javascript">
-
-        var map;
-        var marker;
-        var markers = [];
         $(".button-collapse").sideNav({
             menuWidth: 300, // Default is 300
         });
+        
         $(function () {
+            var map;
+            var marker;
+            var markers = [];
+
             map = new AMap.Map('map', {
                 resizeEnable: true,
                 zoomEnable: true,
@@ -111,8 +111,7 @@
                 center: [104.2114, 28.4230],
                 mapStyle:'amap://styles/6b7438287084617adbee24b920186dd6'
             });
-        })
-        $(function () {
+
             $.ajax({
                 url: 'http://47.93.12.23:3001/getlist',
                 type: 'GET',
@@ -122,36 +121,99 @@
                     var dataArr = Object.entries(dataObj);
                     var template = $('#template_1').html();
                     $('#menu').html(doT.template(template)(dataArr));
+                    selectFirst();
                 }
             })
 
+            //选择一级目录
+            function selectFirst() {
+                var firstArr = $('#menu>li');
+                var aArr;
+                $(firstArr).each(function(i) {
+                    $(firstArr[i]).click(function() {
+                        aArr = $(this).children('div').find('a');   //获取一级目录下的所有文件名元素
+                        if(markers.length != 0) {
+                            map.clearMap();
+                            markers = []
+                        }
+                        $(aArr).each(function (index) {
+                            markers.push(new AMap.Marker({
+                                icon: "car.png",
+                                angle: $(aArr[index]).attr('angle'),
+                                position: [$(aArr[index]).attr('lon'), $(aArr[index]).attr('lat')]
+                            }))
+                            map.setZoomAndCenter(20, new AMap.LngLat($(aArr[0]).attr('lon'), $(aArr[0]).attr('lat')));
+                        })
+                        map.add(markers);
+                        selectImg(aArr);
+                    })
+                })
+            }
+
+            //选中文件
+            function selectImg(aArr) {
+                $(aArr).each(function(i) {
+                    $(aArr[i]).click(function(e) {
+                        var mapMarkers = map.getAllOverlays(marker);
+                        var markerLat = $(this).attr('lat');
+                        var markerLon = $(this).attr('lon');
+                        $(mapMarkers).each(function(i) {
+                            var position = mapMarkers[i].getPosition();
+                            mapMarkers[i].setIcon('car.png')
+                            if(markerLat == position.lat && markerLon == position.lng) {
+                                //更换选中marker‘s icon
+                                mapMarkers[i].setIcon('redCar.png')
+                                map.setZoomAndCenter(30, new AMap.LngLat(markerLon, markerLat));
+                            }
+                        })
+
+                        //显示图片信息
+                        $('#showCard').css('display', 'block')
+                        $('#showImg').attr('src', $(this).attr('path'));
+                        $('#showName').html($(this).text());
+                        $('#showInfo').html("位置" + $(this).attr('lat') + "--" + $(this).attr('lon'))
+                        //阻止冒泡调用
+                        stopPropagation(e);
+                    })
+                })
+            }
+
+            //兼容ie的阻止冒泡
+            function stopPropagation(e) { 
+                e = e || window.event; 
+                if(e.stopPropagation) { //W3C阻止冒泡方法 
+                    e.stopPropagation(); 
+                } else { 
+                    e.cancelBubble = true; //IE阻止冒泡方法 
+                } 
+            }
+
         })
+
+        /*
         function showImg(m) {
             $('#showCard').css('display', 'block')
             $('#showImg').attr('src', $(m).attr('path'));
             $('#showName').html($(m).text());
             $('#showInfo').html("位置" + $(m).attr('lat') + "--" + $(m).attr('lon'))
             map.setZoomAndCenter(15, new AMap.LngLat($(m).attr('lon'), $(m).attr('lat')));
-            addMarker($(m).attr('lat'), $(m).attr('lon'));
+            addMarker($(m).attr('lat'), $(m).attr('lon'), $(m).attr('angle'));
         }
 
-        function showRecords(o) {
-
-        }
-
-        function addMarker(lat, lon) {
-            // var mapMarkers = map.getAllOverlays(marker);
-            // for(var i=0; i<mapMarkers.length; i++) {
-            //     var markersLat = mapMarkers[i].Xg.position.lat;
-            //     var markersLon = mapMarkers[i].Xg.position.lng;
-            //     if(lat == markersLat && lon == markersLon) {
-                    
-            //     }
-            // }
+        function addMarker(lat, lon, angle, e) {
+            //window.event? window.event.returnValue = false : e.preventDefault();
+            var delMarker = new AMap.Marker({
+                icon: 'car.png',
+                angle: angle,
+                position: [lon, lat]
+            })
+            map.remove(delMarker);
+            
         }
 
         //增加多个marker
         function showAllMarker(v) {
+            alert(1);
             var aArr = $(v).children('div').find('a');
             if(markers.length != 0) {
                 map.clearMap();
@@ -167,6 +229,7 @@
             })
             map.add(markers)
         }
+        */
     </script>
 </body>
 
