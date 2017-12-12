@@ -42,17 +42,22 @@
                 </div>
             </nav>
         </div>
-        <ul id="nav-mobile" class="side-nav fixed" style="transform: translateX(0px);top: 66px;">
+        <ul id="nav-mobile" class="side-nav fixed" style="transform: translateX(0px);top: 66px;height: 916px;padding:0px">
             <li class="no-padding">
                 <ul class="collapsible collapsible-accordion" id="menu">
                     <script type="text/template" charset="utf-8" id='template_1'>
                         {{for(var i=0; i<it.length; i++){ }}
-                            <li class="bold">
+                            <li class="bold" onclick="showAllMarker(this)">
                                 <a class="collapsible-header waves-effect waves-teal" href="###">{{=it[i][0]}}</a>
                                 <div class="collapsible-body">
                                     <ul>
                                         {{ for(var j=0; j<it[i][1].length; j++){ }}
-                                            <li><a style="cursor: pointer;" onclick="showImg(this)" path="{{=it[i][1][j].path}}" lat="{{=it[i][1][j].info.lat}}" lon="{{=it[i][1][j].info.lon}}">{{=it[i][1][j].name}}</a></li>
+                                            <li><a style="cursor: pointer;" 
+                                                onclick="showImg(this)" 
+                                                path="{{=it[i][1][j].path}}" 
+                                                lat="{{=it[i][1][j].info.lat}}" 
+                                                lon="{{=it[i][1][j].info.lon}}" 
+                                                angle="{{=it[i][1][j].info.angle}}">{{=it[i][1][j].name}}</a></li>
                                         {{ } }}
                                     </ul>
                                 </div>
@@ -94,6 +99,7 @@
 
         var map;
         var marker;
+        var markers = [];
         $(".button-collapse").sideNav({
             menuWidth: 300, // Default is 300
         });
@@ -134,17 +140,32 @@
         }
 
         function addMarker(lat, lon) {
+            // var mapMarkers = map.getAllOverlays(marker);
+            // for(var i=0; i<mapMarkers.length; i++) {
+            //     var markersLat = mapMarkers[i].Xg.position.lat;
+            //     var markersLon = mapMarkers[i].Xg.position.lng;
+            //     if(lat == markersLat && lon == markersLon) {
+                    
+            //     }
+            // }
+        }
 
-            if (marker) {
-                map.remove(marker);
+        //增加多个marker
+        function showAllMarker(v) {
+            var aArr = $(v).children('div').find('a');
+            if(markers.length != 0) {
+                map.clearMap();
+                markers = []
             }
-
-            marker = new AMap.Marker({
-                icon: "car.png",
-                angle: 0,
-                position: [lon, lat]
-            });
-            marker.setMap(map);
+            $(aArr).each(function (index) {
+                markers.push(new AMap.Marker({
+                    icon: "car.png",
+                    angle: $(aArr[index]).attr('angle'),
+                    position: [$(aArr[index]).attr('lon'), $(aArr[index]).attr('lat')]
+                }))
+                map.setZoomAndCenter(20, new AMap.LngLat($(aArr[0]).attr('lon'), $(aArr[0]).attr('lat')));
+            })
+            map.add(markers)
         }
     </script>
 </body>
