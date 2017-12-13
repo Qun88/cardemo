@@ -71,9 +71,9 @@
         <div class="container" style="max-width: 100%;width:100%; height: 100%;margin:0px">
             <div class="row" style="margin: 0px;height:100%;">
                 <div class="col s12" style="padding: 0px;">
-                    <div class="row" style="margin: 0px;height: 340.5px;">
-                        <div id="showCard" class="card small" style="height: 320px;position: absolute;left:50%;margin-left:-75px;">
-                            <img id="showImg" class="materialboxed" src="" height="260px" alt="">
+                    <div class="row" style="margin: 0px;height: 340.5px;display: flex;justify-content: center;">
+                        <div id="showCard" class="card small" style="height: 320px;">
+                            <img id="showImg" onload="imgLoaded()" class="materialboxed" src="" height="260px" alt="">
                             <div class="card-content" style="padding: 10px 20px;">
                                 <span id="showName"></span>
                                 <br>
@@ -98,7 +98,7 @@
         $(".button-collapse").sideNav({
             menuWidth: 300, // Default is 300
         });
-        
+        var imgL;
         $(function () {
             var map;
             var marker;
@@ -109,7 +109,7 @@
                 zoomEnable: true,
                 zoom: 4,
                 center: [104.2114, 28.4230],
-                mapStyle:'amap://styles/6b7438287084617adbee24b920186dd6'
+                mapStyle:'amap://styles/2f0bfb48def449618818905224c7c2dc'
             });
 
             $.ajax({
@@ -169,9 +169,11 @@
 
                         //显示图片信息
                         $('#showCard').css('display', 'block')
-                        $('#showImg').attr('src', $(this).attr('path'));
+                        imgL = $(this).attr('path');
+                        $('#showImg').attr('src', './timg.gif');
                         $('#showName').html($(this).text());
                         $('#showInfo').html("位置" + $(this).attr('lat') + "--" + $(this).attr('lon'))
+
                         //阻止冒泡调用
                         stopPropagation(e);
                     })
@@ -187,8 +189,11 @@
                     e.cancelBubble = true; //IE阻止冒泡方法 
                 } 
             }
+        }) 
 
-        })
+        function imgLoaded() {
+            $('#showImg').attr('src', imgL);
+        }
     </script>
 </body>
 
