@@ -140,7 +140,8 @@
                             markers.push(new AMap.Marker({
                                 icon: "car.png",
                                 angle: $(aArr[index]).attr('angle'),
-                                position: [$(aArr[index]).attr('lon'), $(aArr[index]).attr('lat')]
+                                position: [$(aArr[index]).attr('lon'), $(aArr[index]).attr('lat')],
+                                title: $(aArr[index]).text()
                             }))
                             map.setZoomAndCenter(20, new AMap.LngLat($(aArr[0]).attr('lon'), $(aArr[0]).attr('lat')));
                         })
@@ -157,10 +158,11 @@
                         var mapMarkers = map.getAllOverlays(marker);
                         var markerLat = $(this).attr('lat');
                         var markerLon = $(this).attr('lon');
+                        var textStr = $(this).text();
                         $(mapMarkers).each(function(i) {
-                            var position = mapMarkers[i].getPosition();
+                            var title = mapMarkers[i].getTitle();
                             mapMarkers[i].setIcon('car.png')
-                            if(markerLat == position.lat && markerLon == position.lng) {
+                            if(textStr == title) {
                                 //更换选中marker‘s icon
                                 mapMarkers[i].setIcon('redCar.png')
                                 map.setZoomAndCenter(30, new AMap.LngLat(markerLon, markerLat));
